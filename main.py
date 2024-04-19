@@ -13,7 +13,6 @@ async def main() -> None:
     """
     # Настройка основных параметров бота
     config: Config = load_config()
-    print(config.tg_bot.token)
     bot: Bot = Bot(token=config.tg_bot.token,
                    parse_mode='HTML')
     dp: Dispatcher = Dispatcher()
