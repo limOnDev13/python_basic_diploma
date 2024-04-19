@@ -15,10 +15,15 @@ class APIModule(ABC):
     Args:
         base_url (str): Базовый url, к которому будут отправляться запросы
         x_rapid_api_host (str): Хост rapidAPI
+        product_name (str): Название товара (необходим для корректного общения с пользователем)
+        measure_of_number (str): Мера товара - м, кг, шт, рубли - в чем измеряется товар
+        (необходим для корректного общения с пользователем)
     """
-    def __init__(self, base_url: str, x_rapid_api_host: str) -> None:
+    def __init__(self, base_url: str, x_rapid_api_host: str, product_name: str, measure_of_number: str) -> None:
         self._base_url: str = base_url
         self._rapid_api_host: str = x_rapid_api_host
+        self._product_name: str = product_name
+        self._measure_of_number: str = measure_of_number
 
     @property
     def base_url(self) -> str:
@@ -29,6 +34,16 @@ class APIModule(ABC):
     def rapid_api_host(self) -> str:
         """Геттер для rapid_api_host"""
         return self._rapid_api_host
+
+    @property
+    def product_name(self) -> str:
+        """Геттер для rapid_api_host"""
+        return self._product_name
+
+    @property
+    def measure_of_number(self) -> str:
+        """Геттер для rapid_api_host"""
+        return self._measure_of_number
 
     @abstractmethod
     def low_api(self, product: str, number: int) -> list[dict]:
@@ -73,10 +88,8 @@ class APIModule(ABC):
         """
         pass
 
-    def request(self, url_request: str,
-                query_string: Optional[str] = None,
-                key_word: Optional[str] = None,
-                pause: int = 1) -> list[dict] | dict:
+    def request(self, url_request: str, query_string: Optional[str] = None,
+                key_word: Optional[str] = None, pause: int = 1) -> list[dict] | dict:
         """
         Метод делает полностью сформированный запрос по переданному url
         :param url_request: url запроса
