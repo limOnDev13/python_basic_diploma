@@ -10,9 +10,15 @@ class TgBot:
 
 
 @dataclass
+class API:
+    rapidAPI_key: str
+
+
+@dataclass
 class Config:
     """Класс - конфиг"""
     tg_bot: TgBot
+    api: API
 
 
 def load_config(path: Optional[str] = None) -> Config:
@@ -26,4 +32,5 @@ def load_config(path: Optional[str] = None) -> Config:
     env: Env = Env()
     env.read_env(path)
 
-    return Config(tg_bot=TgBot(token=env('BOT_TOKEN')))
+    return Config(tg_bot=TgBot(token=env('BOT_TOKEN')),
+                  api=API(rapidAPI_key=env('X-RapidAPI-Key')))
