@@ -1,5 +1,5 @@
 """Модуль, отвечающий за работу с api steam (https://rapidapi.com/1yesari1/api/epic-store-games)"""
-from api_module import APIModule
+from api.api_module import APIModule
 from urllib.parse import urlencode
 from typing import Callable, Optional, Any
 
@@ -18,10 +18,25 @@ class EGSAPIModule(APIModule):
     def __init__(self, request_length_limit: int = 100):
         super().__init__(base_url='https://epic-store-games.p.rapidapi.com/onSale',
                          x_rapid_api_host="epic-store-games.p.rapidapi.com")
+        self.lexicon['low'] = 'Пожалуйста, введите ключевое слово, по которому будут искаться самые дешевые игры'
+        self.lexicon['high'] = 'Пожалуйста, введите ключевое слово, по которому будут искаться самые дорогие игры'
+        self.lexicon['custom'] = ('Пожалуйста, введите ключевое слово,'
+                                  ' по которому будут искаться игры в диапазоне, который вы укажите')
+        self.lexicon['number'] = ('Пожалуйста, введите количество игр, которые вы хотите увидеть'
+                                  ' (в данном api не более 40)')
+        self.lexicon['range'] = 'Пожалуйста, введите ценовой диапазон (два числа через пробел)'
+        self.lexicon['wrong number'] = 'Извините, я вас не понимаю... Пожалуйста, введите целое неотрицательное число'
+        self.lexicon['wrong range'] = ('Извините, я вас не понимаю... Чтобы ввести ценовой диапазон, пожалуйста,'
+                                       ' введите два числа через пробел')
+
         self.__req_len_limit: int = request_length_limit
 
+    def __str__(self) -> str:
+        return 'На данный момент бот работает с API https://rapidapi.com/1yesari1/api/epic-store-games, '\
+               'который позволяет получать информацию о играх с магазина epic games store'
+
     def __get_response(self, *, product: str, number: int,
-                       func_sort: Callable, func_filter: Optional[Callable[[Any], bool]] = None) -> list[dict]:
+                       func_sort: Callable, func_filter: Optional[Callable[[Any], bool]] = None) -> str:
         """
         У методов low_api, high_api и custom_api код отличается только в методе сортировки и фильтре значений.
         Это функция несет в себе их общий функционал
@@ -34,7 +49,7 @@ class EGSAPIModule(APIModule):
         :param func_filter: Функция фильтр
         :type func_filter: Optional[Callable]
         :return: Список запрашиваемых игр
-        :rtype: list[dict]
+        :rtype: str
         """
         query_string: str = urlencode({"searchWords": product,
                                        "categories": "Games",
@@ -62,9 +77,27 @@ class EGSAPIModule(APIModule):
             for game in list_games
         ]
 
-        return result_games
+        return self.__create_str_result(result_games)
 
-    def low_api(self, product: str, number: int) -> list[dict]:
+    @classmethod
+    def __create_str_result(cls, response: list[dict]) -> str:
+        """
+        Метод переводит обработанный ответ сервера в строку
+        :param response: Обработанный ответ сервера
+        :type response: list[dict]
+        :return: Строковый вид обработанного ответа сервера
+        :rtype: str
+        """
+        result_string: str = '\n'.join(['{num}. {title} - {price} руб\nurl: {url}\n'.format(
+            num=num + 1,
+            title=game['title'],
+            price=game['price'],
+            url=game['url']
+        ) for num, game in enumerate(response)])
+
+        return result_string
+
+    def low_api(self, product: str, number: int) -> str:
         """
         Функция ищет игры по ключевому слову product и выводит number самых дешевых из них
         (если цены совпадают, то выводит первые попавшиеся)
@@ -81,7 +114,7 @@ class EGSAPIModule(APIModule):
             func_sort=lambda game: game['price']['totalPrice']['discountPrice']
         )
 
-    def high_api(self, product: str, number: int) -> list[dict]:
+    def high_api(self, product: str, number: int) -> str:
         """
         Функция ищет игры по ключевому слову product и выводит number самых дорогих из них
         (если цены совпадают, то выводит первые попавшиеся)
@@ -98,7 +131,7 @@ class EGSAPIModule(APIModule):
             func_sort=lambda game: -game['price']['totalPrice']['discountPrice']
         )
 
-    def custom_api(self, product: str, custom_range: tuple[float, float], number: int) -> list[dict]:
+    def custom_api(self, product: str, custom_range: tuple[float, float], number: int) -> str:
         """
         Функция ищет игры по ключевому слову product и выводит number шт по возрастанию в ценовом диапазоне custom_range
         (если цены совпадают, то выводит первые попавшиеся)

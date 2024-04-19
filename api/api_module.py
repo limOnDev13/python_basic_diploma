@@ -19,6 +19,18 @@ class APIModule(ABC):
     def __init__(self, base_url: str, x_rapid_api_host: str) -> None:
         self._base_url: str = base_url
         self._rapid_api_host: str = x_rapid_api_host
+        self.lexicon: dict[str, Optional[str]] = {
+            'low': None,
+            'high': None,
+            'custom': None,
+            'number': None,
+            'wrong number': None,
+            'wrong range': None
+        }
+
+    @abstractmethod
+    def __str__(self) -> str:
+        pass
 
     @property
     def base_url(self) -> str:
@@ -31,20 +43,20 @@ class APIModule(ABC):
         return self._rapid_api_host
 
     @abstractmethod
-    def low_api(self, product: str, number: int) -> list[dict]:
+    def low_api(self, product: str, number: int) -> str:
         """
         Запрос, при котором будут запрашиваться самые низкие цены / самые близкие места / самые доступные авто и т.д.
         :param product: Услуга/товар, по которым будет проводиться поиск
         :type product: str
         :param number:  Количество единиц категории (товаров/услуг)
         :type number: int
-        :return: Результат запроса
-        :rtype: list[dict]
+        :return: Результат запроса уже в строковом виде
+        :rtype: str
         """
         pass
 
     @abstractmethod
-    def high_api(self, product: str, number: int) -> list[dict]:
+    def high_api(self, product: str, number: int) -> str:
         """
         Запрос, при котором будут запрашиваться самая высокая стоимость,
         самые дорогие авто, самое удалённое местоположение и так далее
@@ -52,13 +64,13 @@ class APIModule(ABC):
         :type product: str
         :param number:  Количество единиц категории (товаров/услуг)
         :type number: int
-        :return: Результат запроса
+        :return: Результат запроса уже в строковом виде
         :rtype: list[dict]
         """
         pass
 
     @abstractmethod
-    def custom_api(self, product: str, custom_range: tuple[float, float], number: int) -> list[dict]:
+    def custom_api(self, product: str, custom_range: tuple[float, float], number: int) -> str:
         """
         Вывод показателей пользовательского диапазона
         :param product: Услуга/товар, по которым будет проводиться поиск
@@ -68,15 +80,13 @@ class APIModule(ABC):
         :type custom_range: tuple[float, float]
         :param number:  Количество единиц категории (товаров/услуг)
         :type number: int
-        :return: Результат запроса
-        :rtype: list[dict]
+        :return: Результат запроса уже в строковом виде
+        :rtype: str
         """
         pass
 
-    def request(self, url_request: str,
-                query_string: Optional[str] = None,
-                key_word: Optional[str] = None,
-                pause: int = 1) -> list[dict] | dict:
+    def request(self, url_request: str, query_string: Optional[str] = None,
+                key_word: Optional[str] = None, pause: int = 1) -> list[dict] | dict:
         """
         Метод делает полностью сформированный запрос по переданному url
         :param url_request: url запроса
