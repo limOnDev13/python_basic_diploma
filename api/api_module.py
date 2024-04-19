@@ -15,15 +15,22 @@ class APIModule(ABC):
     Args:
         base_url (str): Базовый url, к которому будут отправляться запросы
         x_rapid_api_host (str): Хост rapidAPI
-        product_name (str): Название товара (необходим для корректного общения с пользователем)
-        measure_of_number (str): Мера товара - м, кг, шт, рубли - в чем измеряется товар
-        (необходим для корректного общения с пользователем)
     """
-    def __init__(self, base_url: str, x_rapid_api_host: str, product_name: str, measure_of_number: str) -> None:
+    def __init__(self, base_url: str, x_rapid_api_host: str) -> None:
         self._base_url: str = base_url
         self._rapid_api_host: str = x_rapid_api_host
-        self._product_name: str = product_name
-        self._measure_of_number: str = measure_of_number
+        self.lexicon: dict[str, Optional[str]] = {
+            'low': None,
+            'high': None,
+            'custom': None,
+            'number': None,
+            'wrong number': None,
+            'wrong range': None
+        }
+
+    @abstractmethod
+    def __str__(self) -> str:
+        pass
 
     @property
     def base_url(self) -> str:
@@ -35,31 +42,21 @@ class APIModule(ABC):
         """Геттер для rapid_api_host"""
         return self._rapid_api_host
 
-    @property
-    def product_name(self) -> str:
-        """Геттер для rapid_api_host"""
-        return self._product_name
-
-    @property
-    def measure_of_number(self) -> str:
-        """Геттер для rapid_api_host"""
-        return self._measure_of_number
-
     @abstractmethod
-    def low_api(self, product: str, number: int) -> list[dict]:
+    def low_api(self, product: str, number: int) -> str:
         """
         Запрос, при котором будут запрашиваться самые низкие цены / самые близкие места / самые доступные авто и т.д.
         :param product: Услуга/товар, по которым будет проводиться поиск
         :type product: str
         :param number:  Количество единиц категории (товаров/услуг)
         :type number: int
-        :return: Результат запроса
-        :rtype: list[dict]
+        :return: Результат запроса уже в строковом виде
+        :rtype: str
         """
         pass
 
     @abstractmethod
-    def high_api(self, product: str, number: int) -> list[dict]:
+    def high_api(self, product: str, number: int) -> str:
         """
         Запрос, при котором будут запрашиваться самая высокая стоимость,
         самые дорогие авто, самое удалённое местоположение и так далее
@@ -67,13 +64,13 @@ class APIModule(ABC):
         :type product: str
         :param number:  Количество единиц категории (товаров/услуг)
         :type number: int
-        :return: Результат запроса
+        :return: Результат запроса уже в строковом виде
         :rtype: list[dict]
         """
         pass
 
     @abstractmethod
-    def custom_api(self, product: str, custom_range: tuple[float, float], number: int) -> list[dict]:
+    def custom_api(self, product: str, custom_range: tuple[float, float], number: int) -> str:
         """
         Вывод показателей пользовательского диапазона
         :param product: Услуга/товар, по которым будет проводиться поиск
@@ -83,8 +80,8 @@ class APIModule(ABC):
         :type custom_range: tuple[float, float]
         :param number:  Количество единиц категории (товаров/услуг)
         :type number: int
-        :return: Результат запроса
-        :rtype: list[dict]
+        :return: Результат запроса уже в строковом виде
+        :rtype: str
         """
         pass
 
