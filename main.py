@@ -1,13 +1,25 @@
 import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
+from loguru import logger
 
-from config_data import Config, load_config
+from my_logging import info_logger
+from config_data import Config, load_config, LOG_LEVEL
 from keyboards import set_main_menu
 from handlers import standart_handlers, query_handlers
 from database import start_database
 
 
+logger.remove()
+logger.add("logs/application.log",
+           format="<lvl>[</lvl><c>{time:DD.MM.YYYY HH:mm:ss}</c><lvl>]</lvl> <lvl>{level}:</lvl> <lvl>{message}</lvl>",
+           level=LOG_LEVEL,
+           retention='1 days',
+           rotation='00:01',
+           compression='zip')
+
+
+@info_logger(log_level='DEBUG', message='Запускается программа')
 async def main() -> None:
     """
     Основной скрипт телеграм бота
