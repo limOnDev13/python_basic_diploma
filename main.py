@@ -5,6 +5,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from config_data import Config, load_config
 from keyboards import set_main_menu
 from handlers import standart_handlers, query_handlers
+from database import start_database
 
 
 async def main() -> None:
@@ -18,6 +19,9 @@ async def main() -> None:
                    parse_mode='HTML')
     storage: MemoryStorage = MemoryStorage()
     dp: Dispatcher = Dispatcher(storage=storage)
+
+    # Запустим движок базы данных
+    start_database()
 
     # вывод кнопки меню
     await set_main_menu(bot)
