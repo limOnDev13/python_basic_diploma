@@ -12,6 +12,7 @@ from states import FSMQuery
 from filters import IsDigit, IsRange
 from lexicon import LEXICON_RU
 from api import APIModule
+from database import CRUD
 # Необходимо импортировать модуль с выбранным api
 from api import EGSAPIModule
 
@@ -23,6 +24,8 @@ if not isinstance(api_module, APIModule):
     raise SyntaxError('Импортированный модуль api не является сущностью APIModule!')
 
 router: Router = Router()
+# Подцепим класс CRUD для работы с бд
+crud: CRUD = CRUD()
 
 
 @router.message(Command(commands=['low']), StateFilter(default_state))
@@ -135,9 +138,17 @@ async def process_start_command(message: Message, state: FSMContext) -> None:
                                        custom_range=data['range'])
 
     if answer == '':
+        answer = None
         await message.answer(text=LEXICON_RU['empty string'])
     else:
         await message.answer(text=answer)
+
+    # Сохраним запрос с результатом в бд
+    crud.create(command=data['command'],
+                product=data['product'],
+                cus_range=data['range'],
+                number=data['number'],
+                result=answer)
 
 
 @router.message(StateFilter(FSMQuery.fill_number))
