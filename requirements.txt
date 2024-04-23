@@ -3,3 +3,4 @@ asyncio
 environs
 requests
 SQLAlchemy
+loguru
