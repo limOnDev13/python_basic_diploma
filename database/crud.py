@@ -3,7 +3,7 @@ from sqlalchemy.sql import func
 from sqlalchemy.orm import Session
 from typing import Optional, Literal
 
-from orm import get_session, Requests
+from database.orm import get_session, Requests
 
 
 class CRUD:
