@@ -13,6 +13,7 @@ from filters import IsDigit, IsRange
 from lexicon import LEXICON_RU
 from api import APIModule
 from database import CRUD
+from service import adjusting_length_message
 # Необходимо импортировать модуль с выбранным api
 from api import EGSAPIModule
 
@@ -38,7 +39,6 @@ async def process_history_command(message: Message) -> None:
     """
     # Получим историю запросов из бд
     history: list = crud.read_all()
-
     result_strings: list[str] = [
         '<b>Команда: {command}; продукт: {product};'
         ' количество: {number}; диапазон (если его нет, то None): {range}\n'
@@ -51,7 +51,10 @@ async def process_history_command(message: Message) -> None:
         )
         for row in history
     ]
-    await message.answer(text='\n'.join(result_strings))
+    # История может быть длинным сообщением, поэтому придется его разбить на несколько сообщений
+    result_strings = adjusting_length_message(result_strings)
+    for answer in result_strings:
+        await message.answer(answer)
 
 
 @router.message(Command(commands=['low']), StateFilter(default_state))
