@@ -173,12 +173,19 @@ async def process_input_right_number(message: Message, state: FSMContext) -> Non
     else:
         await message.answer(text=answer)
 
-    # Сохраним запрос с результатом в бд
-    crud.create(command=data['command'],
-                product=data['product'],
-                cus_range=data['range'],
-                number=data['number'],
-                result=answer)
+    if isinstance(data['range'], tuple):
+        # Сохраним запрос с результатом в бд
+        crud.create(command=data['command'],
+                    product=data['product'],
+                    cus_range=f"{data['range'][0]} {data['range'][1]}",
+                    number=data['number'],
+                    result=answer)
+    else:
+        crud.create(command=data['command'],
+                    product=data['product'],
+                    cus_range=data['range'],
+                    number=data['number'],
+                    result=answer)
 
 
 @router.message(StateFilter(FSMQuery.fill_number))
