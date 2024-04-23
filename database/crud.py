@@ -1,8 +1,6 @@
 """Модуль с CRUD операциями над бд"""
-from sqlalchemy.orm.query import Query
 from sqlalchemy.sql import func
 from sqlalchemy.orm import Session
-import sqlalchemy as db
 from typing import Optional, Literal
 
 from orm import get_session, Requests
