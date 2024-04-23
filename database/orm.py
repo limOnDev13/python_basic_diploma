@@ -1,17 +1,16 @@
 """Модуль с ORM"""
 import sqlalchemy as db
 from sqlalchemy import Column
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 
 # Укажем, какую СУБД будем использовать
-engine = db.create_engine('sqlite:///request_history.db')
-
+__engine = db.create_engine('sqlite:///request_history.db')
 # Создаем декларативный класс, от которого будут наследоваться все модели
-Base = declarative_base()
+__Base = declarative_base()
 
 
-class Requests(Base):
+class Requests(__Base):
     """
     Класс - модель, представляющая таблицу запросов,
     где хранится информация о запросах пользователя. Согласно ТЗ, в ней можно хранить не более 10 записей
@@ -22,32 +21,25 @@ class Requests(Base):
     product = Column(db.Text, nullable=False)  # Продукт
     number = Column(db.Integer, nullable=False)  # Количество продукта
     cus_range = Column(db.Text, nullable=True)  # Пользовательский диапазон
+    result = Column(db.Text, nullable=True)
 
-    __table_args__ = (
+    __table_args__: tuple = (
         db.PrimaryKeyConstraint('id', name='request_id'),
-        db.UniqueConstraint('command', 'product', 'number', 'cus_range', name='unique_request')
-    )  # В таблицу будут сохраняться только уникальные запросы
-
-    results = relationship('Results')
-
-
-class Results(Base):
-    """
-    Класс - модель, представляющая таблицу результатов на запросы.
-    Связана по внешнему ключу с таблицей requests
-    """
-    __tablename__ = 'results'
-    id = Column(db.Integer, autoincrement='auto')
-    req_id = Column(db.Integer)
-    seq_number = Column(db.Integer)
-    product_title = Column(db.Text)
-    amount = Column(db.REAL)
-    meta = Column(db.Text)
-
-    __table_args__ = (
-        db.PrimaryKeyConstraint('id', name='result_id'),
-        db.ForeignKeyConstraint(['req_id'], ['requests.id'])
     )
 
 
-Base.metadata.create_all(engine)
+def start_database() -> None:
+    """
+    Метод запускает базу данных
+    :return: None
+    """
+    __Base.metadata.create_all(__engine)
+
+
+def get_session() -> Session:
+    """
+    Метод возвращает объект сессии
+    :return: объект сессии
+    :rtype: Session
+    """
+    return Session(bind=__engine)
