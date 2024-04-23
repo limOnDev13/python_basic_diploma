@@ -21,6 +21,9 @@ class Config:
     api: API
 
 
+LOG_LEVEL: str = 'DEBUG'
+
+
 def load_config(path: Optional[str] = None) -> Config:
     """
     Функция для загрузки данных из переменных окружения
