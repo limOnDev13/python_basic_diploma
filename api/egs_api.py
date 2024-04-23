@@ -2,6 +2,8 @@
 from api.api_module import APIModule
 from urllib.parse import urlencode
 from typing import Callable, Optional, Any
+from my_logging import info_logger
+from loguru import logger
 
 
 class EGSAPIModule(APIModule):
@@ -66,18 +68,23 @@ class EGSAPIModule(APIModule):
             list_games = [game for game in list_games if func_filter(game)]
 
         # Выведем самые дешевые игры
-        list_games.sort(key=func_sort)
-        list_games = list_games[:number]
-        # Отсеем лишнюю информацию
-        result_games: list[dict] = [
-            {'title': game['title'],
-             'price': round(game['price']['totalPrice']['discountPrice'] / 100, 2),
-             'url': game['url']
-             }
-            for game in list_games
-        ]
+        logger.warning(f'Метод __get_response пытается отфильтровать это\n{list_games}')
+        try:
+            list_games.sort(key=func_sort)
+            list_games = list_games[:number]
+            # Отсеем лишнюю информацию
+            result_games: list[dict] = [
+                {'title': game['title'],
+                 'price': round(game['price']['totalPrice']['discountPrice'] / 100, 2),
+                 'url': game['url']
+                 }
+                for game in list_games
+            ]
 
-        return self.__create_str_result(result_games)
+            return self.__create_str_result(result_games)
+        except AttributeError:
+            logger.warning(f'Запрос успешно обработан, но результат не найден')
+            return 'По вашему ключевому слову игры не найдены('
 
     @classmethod
     def __create_str_result(cls, response: list[dict]) -> str:
@@ -97,6 +104,7 @@ class EGSAPIModule(APIModule):
 
         return result_string
 
+    @info_logger(log_level='DEBUG', message='Запускается метод')
     def low_api(self, product: str, number: int) -> str:
         """
         Функция ищет игры по ключевому слову product и выводит number самых дешевых из них
@@ -114,6 +122,7 @@ class EGSAPIModule(APIModule):
             func_sort=lambda game: game['price']['totalPrice']['discountPrice']
         )
 
+    @info_logger(log_level='DEBUG', message='Запускается метод')
     def high_api(self, product: str, number: int) -> str:
         """
         Функция ищет игры по ключевому слову product и выводит number самых дорогих из них
@@ -131,6 +140,7 @@ class EGSAPIModule(APIModule):
             func_sort=lambda game: -game['price']['totalPrice']['discountPrice']
         )
 
+    @info_logger(log_level='DEBUG', message='Запускается метод')
     def custom_api(self, product: str, custom_range: tuple[float, float], number: int) -> str:
         """
         Функция ищет игры по ключевому слову product и выводит number шт по возрастанию в ценовом диапазоне custom_range
