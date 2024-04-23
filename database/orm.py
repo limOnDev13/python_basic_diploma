@@ -1,7 +1,7 @@
 """Модуль с ORM"""
 import sqlalchemy as db
 from sqlalchemy import Column
-from sqlalchemy.orm import Session, declarative_base, sessionmaker
+from sqlalchemy.orm import Session, declarative_base
 
 
 # Укажем, какую СУБД будем использовать

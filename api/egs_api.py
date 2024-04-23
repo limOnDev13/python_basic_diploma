@@ -83,7 +83,7 @@ class EGSAPIModule(APIModule):
 
             return self.__create_str_result(result_games)
         except AttributeError:
-            logger.warning(f'Запрос успешно обработан, но результат не найден')
+            logger.warning('Запрос успешно обработан, но результат не найден')
             return 'По вашему ключевому слову игры не найдены('
 
     @classmethod

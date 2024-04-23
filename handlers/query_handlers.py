@@ -1,7 +1,7 @@
 """
 Модуль с хэндлерами, отвечающими за обработку команд /low, /high, /custom и /history
 """
-from aiogram import Router, F
+from aiogram import Router
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.state import default_state
 from aiogram.fsm.context import FSMContext
@@ -73,7 +73,7 @@ async def process_low_command(message: Message, state: FSMContext) -> None:
 
 
 @router.message(Command(commands=['high']), StateFilter(default_state))
-async def process_low_command(message: Message, state: FSMContext) -> None:
+async def process_high_command(message: Message, state: FSMContext) -> None:
     """
     Хэндлер для команды /high
     :param message: Объект сообщения пользователя
@@ -88,7 +88,7 @@ async def process_low_command(message: Message, state: FSMContext) -> None:
 
 
 @router.message(Command(commands=['custom']), StateFilter(default_state))
-async def process_low_command(message: Message, state: FSMContext) -> None:
+async def process_custom_command(message: Message, state: FSMContext) -> None:
     """
     Хэндлер для команды /custom
     :param message: Объект сообщения пользователя
@@ -125,7 +125,7 @@ async def process_filling_product(message: Message, state: FSMContext) -> None:
 
 
 @router.message(StateFilter(FSMQuery.fill_range), IsRange())
-async def process_start_command(message: Message, state: FSMContext, low_limit: int, high_limit: int) -> None:
+async def process_input_right_range(message: Message, state: FSMContext, low_limit: int, high_limit: int) -> None:
     """
     Хэндлер для обработки ввода диапазона
     :param message: Объект сообщения пользователя
@@ -144,7 +144,7 @@ async def process_start_command(message: Message, state: FSMContext, low_limit: 
 
 
 @router.message(StateFilter(FSMQuery.fill_number), IsDigit())
-async def process_start_command(message: Message, state: FSMContext) -> None:
+async def process_input_right_number(message: Message, state: FSMContext) -> None:
     """
     Хэндлер для обработки ввода числа в состоянии ввода числа
     :param message: Объект сообщения пользователя
@@ -182,7 +182,7 @@ async def process_start_command(message: Message, state: FSMContext) -> None:
 
 
 @router.message(StateFilter(FSMQuery.fill_number))
-async def process_start_command(message: Message) -> None:
+async def process_input_wrong_number(message: Message) -> None:
     """
     Хэндлер для обработки некорректного сообщения в состоянии ввода числа
     :param message: Объект сообщения пользователя
@@ -193,7 +193,7 @@ async def process_start_command(message: Message) -> None:
 
 
 @router.message(StateFilter(FSMQuery.fill_range))
-async def process_start_command(message: Message) -> None:
+async def process_input_wrong_range(message: Message) -> None:
     """
     Хэндлер для обработки некорректного сообщения в состоянии ввода числа
     :param message: Объект сообщения пользователя

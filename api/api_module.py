@@ -127,4 +127,3 @@ class APIModule(ABC):
             except HTTPError as exc:
                 # Логгируем ошибку
                 logger.error(exc)
-

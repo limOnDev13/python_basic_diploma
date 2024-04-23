@@ -33,4 +33,3 @@ def info_logger(log_level: Literal['CRITICAL', 'ERROR', 'SUCCESS', 'WARNING', 'I
                 return func(*args, **kwargs)
         return wrapper
     return log_wrapper
-
