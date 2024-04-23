@@ -28,6 +28,32 @@ router: Router = Router()
 crud: CRUD = CRUD()
 
 
+@router.message(Command(commands=['history']), StateFilter(default_state))
+async def process_history_command(message: Message) -> None:
+    """
+    Хэндлер, обрабатывающий команду /history в дефолтном состоянии
+    :param message: Объект сообщения
+    :type message: Message
+    :return: None
+    """
+    # Получим историю запросов из бд
+    history: list = crud.read_all()
+
+    result_strings: list[str] = [
+        '<b>Команда: {command}; продукт: {product};'
+        ' количество: {number}; диапазон (если его нет, то None): {range}\n'
+        'Результат:</b>\n{result}'.format(
+            command=row[0],
+            product=row[1],
+            number=row[2],
+            range=row[3],
+            result=row[4]
+        )
+        for row in history
+    ]
+    await message.answer(text='\n'.join(result_strings))
+
+
 @router.message(Command(commands=['low']), StateFilter(default_state))
 async def process_low_command(message: Message, state: FSMContext) -> None:
     """
@@ -91,6 +117,7 @@ async def process_filling_product(message: Message, state: FSMContext) -> None:
         await message.answer(text=api_module.lexicon['range'])
     else:
         await state.set_state(FSMQuery.fill_number)
+        await state.update_data(range=None)
         await message.answer(text=api_module.lexicon['number'])
 
 
