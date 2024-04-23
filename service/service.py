@@ -45,8 +45,4 @@ def adjusting_length_message(response_list: list[str]) -> list[str]:
     if len(current_message) != 0:
         result_messages.append('\n'.join(current_message))
 
-    print(response_list)
-    print('------------------------------------------------------------------')
-    print(result_messages)
-
     return result_messages
