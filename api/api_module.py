@@ -3,9 +3,12 @@
 from abc import ABC, abstractmethod
 import requests
 from requests import Response
-from config_data.config import Config, load_config
+from requests.exceptions import HTTPError
 import time
 from typing import Optional
+from loguru import logger
+
+from config_data.config import Config, load_config
 
 
 class APIModule(ABC):
@@ -109,10 +112,19 @@ class APIModule(ABC):
         }
 
         while True:
-            response: Response = requests.get(url_request, headers=headers, params=query_string)
-            if isinstance(response.json(), dict) and (key_word is not None) and (key_word not in response):
-                print('Превышена скорость запросов. Засыпаю на', pause, 'сек')
-                time.sleep(pause)
-            else:
-                return response.json()
+            try:
+                response: Response = requests.get(url_request, headers=headers, params=query_string)
+                # Если код статуса не равен 200, то это ошибка - залоггируем ее
+                if response.status_code != 200:
+                    raise HTTPError(f'Код статуса запроса равен {response.status_code}')
+                if isinstance(response.json(), dict) and (key_word is not None) and (key_word not in response):
+                    print('Превышена скорость запросов. Засыпаю на', pause, 'сек')
+                    time.sleep(pause)
+                else:
+                    # Логгируем успешный запрос
+                    logger.success('Запрос успешно выполнен')
+                    return response.json()
+            except HTTPError as exc:
+                # Логгируем ошибку
+                logger.error(exc)
 

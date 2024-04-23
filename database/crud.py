@@ -2,6 +2,7 @@
 from sqlalchemy.sql import func
 from sqlalchemy.orm import Session
 from typing import Optional, Literal
+from my_logging import info_logger
 
 from database.orm import get_session, Requests
 
@@ -13,6 +14,7 @@ class CRUD:
     def __init__(self):
         self.__session: Session = get_session()  # Объект сессии
 
+    @info_logger(log_level='DEBUG', message='Запускается метод')
     def read_all(self) -> Optional[list]:
         """
         Метод возвращает всю бд
@@ -25,6 +27,7 @@ class CRUD:
                                     Requests.cus_range,
                                     Requests.result).all()
 
+    @info_logger(log_level='DEBUG', message='Запускается метод')
     def read(self, command: Literal['low', 'high', 'custom'],
              product: str, number: int, cus_range: Optional[str] = None
              ) -> Optional[list]:
@@ -54,6 +57,7 @@ class CRUD:
         else:
             return result_list
 
+    @info_logger(log_level='DEBUG', message='Запускается метод')
     def create(self, command: Literal['low', 'high', 'custom'],
                product: str, number: int, cus_range: Optional[str],
                result: Optional[str], limit_requests: int = 10) -> None:
@@ -94,6 +98,7 @@ class CRUD:
         # Закоммитим
         self.__session.commit()
 
+    @info_logger(log_level='DEBUG', message='Запускается метод')
     def delete(self, prim_key: int) -> None:
         """
         Метод удаляет по первичному ключу запрос из бд
