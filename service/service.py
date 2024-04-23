@@ -11,26 +11,42 @@ def adjusting_length_message(response_list: list[str]) -> list[str]:
     :rtype: list[str]
     """
     result_messages: list[str] = list()
-    cur_msg_length: int = 0
-    cur_msg: str = ''
-    cur_num_strings: int = 0
+    current_message: list[str] = list()
+    line_breaker_number: int = 0
+    current_length: int = 0
 
     for string in response_list:
-        # Перебираем все строки, пока не дойдем до максимальной длины сообщения в Телеграмме
-        if cur_msg_length + len(string) < MAX_MSG_LENGTH - cur_num_strings:  # Строки будут соединяться с помощью \n
-            cur_msg += '\n' + string
-            cur_msg_length = len(cur_msg)
-            cur_num_strings += 1
-        elif cur_msg_length == 0 and len(string) >= MAX_MSG_LENGTH:
-            # Если одна строка длиннее, чем максимальная длина - разбиваем ее на несколько сообщений
-            while len(string) >= MAX_MSG_LENGTH:
-                result_messages.append(string[:MAX_MSG_LENGTH - 1])
-                string = string[MAX_MSG_LENGTH - 1:]
+        if current_length + len(string) + line_breaker_number < MAX_MSG_LENGTH:
+            # Если новая строка влезает в предел (с учетом переноса строки), то добавляем ее в текущее сообщение
+            current_length += len(string) + 1
+            line_breaker_number += 1
+            current_message.append(string)
         else:
-            # Если дошли до предела, то добавляем перечисленные строки в единую строку
-            result_messages.append(cur_msg)
-            cur_msg_length = 0
-            cur_msg = ''
-            cur_num_strings = 0
+            if len(current_message) != 0:
+                # Если мы достигли предела, то добавим в итоговый список сообщений все, что влезло
+                result_messages.append('\n'.join(current_message))
+
+            # Текущая string может превышать предел длины сообщений
+            if len(string) > MAX_MSG_LENGTH:
+                # Будем разбивать string на несколько сообщений
+                while len(string) > 0:
+                    result_messages.append(string[:MAX_MSG_LENGTH])
+                    string = string[MAX_MSG_LENGTH:]
+                line_breaker_number = 0
+                current_message = list()
+                current_length = 0
+            else:
+                # Иначе все обнуляем
+                line_breaker_number = 1
+                current_message = [string]
+                current_length = len(string) + 1
+
+    # Последние string могли не достигнуть предела, поэтому их отдельно нужно добавить в результатные сообщения
+    if len(current_message) != 0:
+        result_messages.append('\n'.join(current_message))
+
+    print(response_list)
+    print('------------------------------------------------------------------')
+    print(result_messages)
 
     return result_messages
