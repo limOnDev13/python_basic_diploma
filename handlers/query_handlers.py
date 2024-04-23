@@ -12,6 +12,7 @@ from states import FSMQuery
 from filters import IsDigit, IsRange
 from lexicon import LEXICON_RU
 from api import APIModule
+from database import CRUD
 # Необходимо импортировать модуль с выбранным api
 from api import EGSAPIModule
 
@@ -23,6 +24,34 @@ if not isinstance(api_module, APIModule):
     raise SyntaxError('Импортированный модуль api не является сущностью APIModule!')
 
 router: Router = Router()
+# Подцепим класс CRUD для работы с бд
+crud: CRUD = CRUD()
+
+
+@router.message(Command(commands=['history']), StateFilter(default_state))
+async def process_history_command(message: Message) -> None:
+    """
+    Хэндлер, обрабатывающий команду /history в дефолтном состоянии
+    :param message: Объект сообщения
+    :type message: Message
+    :return: None
+    """
+    # Получим историю запросов из бд
+    history: list = crud.read_all()
+
+    result_strings: list[str] = [
+        '<b>Команда: {command}; продукт: {product};'
+        ' количество: {number}; диапазон (если его нет, то None): {range}\n'
+        'Результат:</b>\n{result}'.format(
+            command=row[0],
+            product=row[1],
+            number=row[2],
+            range=row[3],
+            result=row[4]
+        )
+        for row in history
+    ]
+    await message.answer(text='\n'.join(result_strings))
 
 
 @router.message(Command(commands=['low']), StateFilter(default_state))
@@ -88,6 +117,7 @@ async def process_filling_product(message: Message, state: FSMContext) -> None:
         await message.answer(text=api_module.lexicon['range'])
     else:
         await state.set_state(FSMQuery.fill_number)
+        await state.update_data(range=None)
         await message.answer(text=api_module.lexicon['number'])
 
 
@@ -135,9 +165,17 @@ async def process_start_command(message: Message, state: FSMContext) -> None:
                                        custom_range=data['range'])
 
     if answer == '':
+        answer = None
         await message.answer(text=LEXICON_RU['empty string'])
     else:
         await message.answer(text=answer)
+
+    # Сохраним запрос с результатом в бд
+    crud.create(command=data['command'],
+                product=data['product'],
+                cus_range=data['range'],
+                number=data['number'],
+                result=answer)
 
 
 @router.message(StateFilter(FSMQuery.fill_number))
