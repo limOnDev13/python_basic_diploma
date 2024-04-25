@@ -9,7 +9,7 @@ Python basic diploma
 Функционал бота
 -
 ### Команда /start
-Бот поприветствует пользователя и предложит прочить ему справку о данном боте
+Бот поприветствует пользователя и предложит прочитать ему справку о данном боте
 
 ### Команда /help
 Справка о возможностях бота
@@ -55,3 +55,4 @@ https://epic-store-games.p.rapidapi.com. Для получения токена 
 
 ## Демо
 ![using a color picker](https://gitlab.skillbox.ru/vladimir_volosnikov/python_basic_diploma/-/raw/master/demo.gif)
+Если демо не грузится - перейди по ссылке https://gitlab.skillbox.ru/vladimir_volosnikov/python_basic_diploma/-/blob/master/demo.gif или ищи в репозитории demo.gif
